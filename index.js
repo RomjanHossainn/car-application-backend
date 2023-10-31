@@ -12,8 +12,12 @@ app.get('/',(req,res) =>{
     res.send('Doctor Running')
 })
 
-const uri =
-  `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.4ievbno.mongodb.net/?retryWrites=true&w=majority`;
+
+
+
+
+
+const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.4ievbno.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -47,6 +51,7 @@ async function run() {
 
 
 
+
     app.get("/checkout/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -57,11 +62,55 @@ async function run() {
       res.send(result);
     });
 
+    
+
 
     app.post('/postorder',async(req,res) =>{
       const order = req.body;
       const result = await orderDataBase.insertOne(order);
       res.send(result);
+    })
+
+    app.delete('/deleteorders/:id',async (req,res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await orderDataBase.deleteOne(query);
+      res.send(result);
+    })
+
+    app.put('/updateorders/:id',async(req,res) => {
+      const updateOrder = req.body;
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+
+      const updateDoc = {
+        $set: {
+          status: updateOrder.status,
+        },
+      };
+
+
+      const result = await orderDataBase.updateOne(query,updateDoc);
+      res.send(result);
+
+      // console.log(id)
+      // console.log(updateOrder)
+    })
+    
+
+    app.get('/getorders',async(req,res) => {
+ 
+      let dataQuery = {};
+
+      if(req.query?.email){
+        dataQuery = {email : req.query?.email}
+      }
+
+      const result = await orderDataBase.find(dataQuery).toArray();
+
+      res.send(result)
+      
+      
     })
 
    
